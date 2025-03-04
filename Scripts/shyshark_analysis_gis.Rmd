@@ -17,7 +17,7 @@ install.packages("sf")
 ```
 
 ## Reading in Libraries
-I then read in the libraries I will need to start this project. Along the way I will add more.
+I then read in the libraries I will need to start this project. Along the way I will read in more libraries.
 ```{r}
 library(tidyverse)
 library(rinat)
@@ -75,6 +75,7 @@ class(ssPa)
 ```
 
 ## Making the data frame into a spatial object
+Making the data frames into spatial objects allows me to work with GIS functions as well as making data visualization easier. Setting the Coordinate Reference System (CRS) tells R how to interpret the coordinates of my spatial data. In this case I told R to only plot my data points on the Cape Peninsula.
 ```{r}
 ssHe <- st_as_sf(ssHe, coords = c("longitude", "latitude"), crs = 4326)
 print(ssHe)
@@ -99,7 +100,7 @@ names(ssPa)
 
 
 ## Creating Plots 
-Finding out where the data lies on a plot.
+Finding out where the data lies on a plot. This plot will only come up with data points but no background or base map. This is just the first step in making a map of where these species are distributed.
 ```{r}
 install.packages("ggplot2")
 library(ggplot2)
@@ -109,7 +110,7 @@ ggplot() + geom_sf(data=ssPa)
 
 ```
 
-Now plotting them with a base layer.
+Now plotting them with a base layer. This base layer will put a map behind the data to show where exactly the data points lie within the Cape Peninsula.
 ```{r}
 library(rosm)
 library(ggspatial)
@@ -127,7 +128,7 @@ ggplot() +
 ```
 
 ## Creating Interactive Maps
-Using leaflet and htmltools, we will now create an interactive map for all three species.
+Using leaflet and htmltools, we will now create interactive maps for all three species. With these maps we can zoom in and out to see the exact location of the sharks.
 ```{r}
 library(leaflet)
 library(htmltools)
@@ -156,7 +157,7 @@ leaflet() %>%
 ```
 
 ## Doing common sense checks
-
+This step is to check if all the data points on the maps are research grade and not from someones back yard. In this case, the data on Haploblepharus edwardsii shows that there are sharks on land, however, this is an iNaturalist error and not one from the coding. I double checked this by clicking the link of a data point and seeing if it was in the same location as on my interactive map. Because they were in the same place on both iNaturalist and my map, it means that the iNaturalist data on location of the sharks is skewed slightly.
 ```{r}
 library(mapview)
 library(leafpop)
@@ -232,7 +233,8 @@ ssPa$longitude <- ssPa_coords[, 1]
 ssPa$latitude <- ssPa_coords[, 2]
 ```
 
-## Creating the 
+## Creating the three species interactive map
+Similarly to the first time I created an interactive map, I used the same process for this but I continued adding addCircleMarkers() to make the interactive map more than one species.
 ```{r}
 library(leaflet)
 
@@ -273,6 +275,6 @@ leaflet() %>%
   )
 ```
 
-
+Now I have an interactive map with all three species distributions on it. This will allow me to plan my dive sites for data collection when I start collecting my own data for my honours project.
 
 
