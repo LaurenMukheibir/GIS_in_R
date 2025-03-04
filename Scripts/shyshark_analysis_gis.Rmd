@@ -11,13 +11,14 @@ The data I will be using is from iNaturalist. Where I will be looking at the dis
 ## Setting CRAN
 ```{r}
 options(repos = c(CRAN = "https://cloud.r-project.org"))
-
 ```
+
 
 
 ## Installing Packages
 Below are the packages needed to start this project. Along the way I will add more.
 ```{r}
+install.packages("rmarkdown")
 install.packages("tidyverse")
 install.packages("rinat")
 install.packages("sf")

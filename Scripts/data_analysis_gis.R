@@ -8,6 +8,7 @@ options(repos = c(CRAN = "https://cloud.r-project.org"))
 
 
 #installing packages
+install.packages("rmarkdown")
 install.packages("tidyverse")
 install.packages("rinat")
 install.packages("sf")
