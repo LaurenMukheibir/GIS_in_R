@@ -1,0 +1,282 @@
+---
+title: "shyshark_distribution_gis"
+output: html_document
+date: "2025-03-03"
+---
+
+## Introduction
+This GIS project is for an assignment for Jasper Slingsby's module called GIS in R. 
+The data I will be using is from iNaturalist. Where I will be looking at the distribution of Shysharks, along the Cape Peninsula. The species involved are Haploblepharus edwardsii (ssHe) and Haploblepharus pictus (ssHp). In addition, I used data on Poroderma africanum to compare distributions of these Shysharks.
+
+
+## Installing Packages
+Below are the packages needed to start this project. Along the way I will add more.
+```{r}
+install.packages("rmarkdown")
+install.packages("tidyverse")
+install.packages("rinat")
+install.packages("sf")
+```
+
+## Reading in Libraries
+I then read in the libraries I will need to start this project. Along the way I will read in more libraries.
+```{r}
+library(tidyverse)
+library(rinat)
+library(sf)
+```
+
+## Reading in the data from iNaturalist
+I will be looking at the species Haploblepharus edwardsii, Haploblepharus pictus and Poroderma africanum. The View() and head() lines of code allows me to view the whole data set or just the first 6 rows.
+```{r}
+ssHp <- get_inat_obs( taxon_name = "Haploblepharus pictus",
+                    bounds = c (-35, 18, -33.5, 18.5),
+                    maxresults = 1000)
+View(ssHp)
+head(ssHp)
+
+ssHe <- get_inat_obs( taxon_name = "Haploblepharus edwardsii",
+                      bounds = c (-35, 18, -33.5, 18.5),
+                      maxresults = 1000)
+View(ssHe)
+head(ssHe)
+
+ssPa <- get_inat_obs( taxon_name = "Poroderma africanum",
+                      bounds = c (-35, 18, -33.5, 18.5),
+                      maxresults = 1000)
+View(ssPa)
+head(ssPa)
+```
+
+## Filtering Returned Observations
+This narrows down the data based on specific conditions or criteria.  I want the data to only be research grade and I want to exclude cultivated records (e.g. data points from aquariums etc.)
+```{r}
+ssHp <- ssHp %>% filter(positional_accuracy<46 & 
+                      latitude<0 &
+                      !is.na(latitude) &
+                      captive_cultivated == "false" &
+                      quality_grade == "research")
+
+class(ssHp)
+
+ssHe <- ssHe %>% filter(positional_accuracy<46 & 
+                          latitude<0 &
+                          !is.na(latitude) &
+                          captive_cultivated == "false" &
+                          quality_grade == "research")
+
+class(ssHe)
+
+ssPa <- ssPa %>% filter(positional_accuracy<46 & 
+                          latitude<0 &
+                          !is.na(latitude) &
+                          captive_cultivated == "false" &
+                          quality_grade == "research")
+
+class(ssPa)
+```
+
+## Making the data frame into a spatial object
+Making the data frames into spatial objects allows me to work with GIS functions as well as making data visualization easier. Setting the Coordinate Reference System (CRS) tells R how to interpret the coordinates of my spatial data. In this case I told R to only plot my data points on the Cape Peninsula.
+```{r}
+ssHe <- st_as_sf(ssHe, coords = c("longitude", "latitude"), crs = 4326)
+print(ssHe)
+class(ssHe)
+
+ssHp <- st_as_sf(ssHp, coords = c("longitude", "latitude"), crs = 4326)
+print(ssHp)
+class(ssHp)
+
+ssPa <- st_as_sf(ssPa, coords = c("longitude", "latitude"), crs = 4326)
+print(ssPa)
+class(ssPa)
+
+# Should return "EPSG: 4326" (double checking that the EPSG is correct)
+st_crs(ssHe)
+names(ssHe)
+st_crs(ssHp)
+names(ssHp)
+st_crs(ssPa)
+names(ssPa)
+```
+
+
+## Creating Plots 
+Finding out where the data lies on a plot. This plot will only come up with data points but no background or base map. This is just the first step in making a map of where these species are distributed.
+```{r}
+install.packages("ggplot2")
+library(ggplot2)
+ggplot() + geom_sf(data=ssHe)
+ggplot() + geom_sf(data=ssHp)
+ggplot() + geom_sf(data=ssPa)
+
+```
+
+Now plotting them with a base layer. This base layer will put a map behind the data to show where exactly the data points lie within the Cape Peninsula.
+```{r}
+library(rosm)
+library(ggspatial)
+ggplot() +
+  annotation_map_tile(type = "cartolight", progress = "none") +
+  geom_sf(data=ssHe)
+
+ggplot() +
+  annotation_map_tile(type = "cartolight", progress = "none") +
+  geom_sf(data=ssHp)
+
+ggplot() +
+  annotation_map_tile(type = "cartolight", progress = "none") +
+  geom_sf(data=ssPa)
+```
+
+## Creating Interactive Maps
+Using leaflet and htmltools, we will now create interactive maps for all three species. With these maps we can zoom in and out to see the exact location of the sharks.
+```{r}
+library(leaflet)
+library(htmltools)
+leaflet() %>%
+  # Add default OpenStreetMap map tiles
+  addTiles(group = "Default") %>%  
+  # Add our points
+  addCircleMarkers(data = ssHe,
+                   group = "Haploblepharus edwardsii",
+                   radius = 3, 
+                   color = "blue")
+
+leaflet() %>%
+  addTiles(group = "Default") %>%  
+  addCircleMarkers(data = ssHp,
+                   group = "Haploblepharus pictus",
+                   radius = 3, 
+                   color = "blue") 
+
+leaflet() %>%
+  addTiles(group = "Default") %>%  
+  addCircleMarkers(data = ssPa,
+                   group = "Haploblepharus pictus",
+                   radius = 3, 
+                   color = "blue")
+```
+
+## Doing common sense checks
+This step is to check if all the data points on the maps are research grade and not from someones back yard. In this case, the data on Haploblepharus edwardsii shows that there are sharks on land, however, this is an iNaturalist error and not one from the coding. I double checked this by clicking the link of a data point and seeing if it was in the same location as on my interactive map. Because they were in the same place on both iNaturalist and my map, it means that the iNaturalist data on location of the sharks is skewed slightly.
+```{r}
+library(mapview)
+library(leafpop)
+
+mapview(ssHe, 
+        popup = 
+          popupTable(ssHe,
+                     zcol = c("user_login", "captive_cultivated", "url")))
+mapview(ssHp, 
+        popup = 
+          popupTable(ssHp,
+                     zcol = c("user_login", "captive_cultivated", "url")))
+mapview(ssPa, 
+        popup = 
+          popupTable(ssPa,
+                     zcol = c("user_login", "captive_cultivated", "url")))
+```
+
+
+## Adding URL to the data points
+In order for the map to be more interactive. Adding the URL to the data points is a good way to access the observational data directly.
+```{r}
+install.packages("dplyr")  # Only run if you haven't installed it yet
+library(dplyr)
+
+lssHe <- ssHe %>%
+  mutate(click_url = paste("<b><a href='", url, "'>Link to iNat observation</a></b>"))
+
+mapview(ssHe, 
+        popup = 
+          popupTable(lssHe,
+                     zcol = c("user_login", "captive_cultivated", "click_url")))
+
+
+lssHp <- ssHp %>%
+  mutate(click_url = paste("<b><a href='", url, "'>Link to iNat observation</a></b>"))
+
+mapview(ssHp, 
+        popup = 
+          popupTable(lssHp,
+                     zcol = c("user_login", "captive_cultivated", "click_url")))
+
+lssPa <- ssPa %>%
+  mutate(click_url = paste("<b><a href='", url, "'>Link to iNat observation</a></b>"))
+
+mapview(ssPa, 
+        popup = 
+          popupTable(lssPa,
+                     zcol = c("user_login", "captive_cultivated", "click_url")))
+
+```
+
+## Extracting Coordinates from the Geometry Column
+In order to plot all three species on the same interactive map, I need to extract the coordinates and add them as new columns in the data frame. I then checked the first 6 lines of code to see if R ran this correctly.
+```{r}
+library(sf)
+ssHe_coords <- st_coordinates(ssHe)
+# Add longitude and latitude as new columns to the dataframe
+ssHe$longitude <- ssHe_coords[, 1]
+ssHe$latitude <- ssHe_coords[, 2]
+
+# Check the data
+head(ssHe)
+
+#same as above lines of code but for the other two species
+ssHp_coords <- st_coordinates(ssHp)
+ssHp$longitude <- ssHp_coords[, 1]
+ssHp$latitude <- ssHp_coords[, 2]
+
+
+ssPa_coords <- st_coordinates(ssPa)
+ssPa$longitude <- ssPa_coords[, 1]
+ssPa$latitude <- ssPa_coords[, 2]
+```
+
+## Creating the three species interactive map
+Similarly to the first time I created an interactive map, I used the same process for this but I continued adding addCircleMarkers() to make the interactive map more than one species.
+```{r}
+library(leaflet)
+
+leaflet() %>%
+  addTiles() %>%
+  addCircleMarkers(data = ssHe,
+                   ~longitude, ~latitude, 
+                   color = "blue", 
+                   radius = 3, 
+                   popup = ~paste("<b>Species:</b>", "Haploblepharus edwardsii", 
+                                  "<br><b>User:</b>", user_login, 
+                                  "<br><b>Cultivated:</b>", captive_cultivated, 
+                                  "<br><a href='", url, "'>Link to observation</a>"),
+                   group = "Haploblepharus edwardsii") %>%
+  addCircleMarkers(data = ssHp,
+                   ~longitude, ~latitude, 
+                   color = "green", 
+                   radius = 3, 
+                   popup = ~paste("<b>Species:</b>", "Haploblepharus pictus", 
+                                  "<br><b>User:</b>", user_login, 
+                                  "<br><b>Cultivated:</b>", captive_cultivated, 
+                                  "<br><a href='", url, "'>Link to observation</a>"),
+                   group = "Haploblepharus pictus") %>%
+  addCircleMarkers(data = ssPa,
+                   ~longitude, ~latitude, 
+                   color = "pink", 
+                   radius = 3, 
+                   popup = ~paste("<b>Species:</b>", "Poroderma africanum", 
+                                  "<br><b>User:</b>", user_login, 
+                                  "<br><b>Cultivated:</b>", captive_cultivated, 
+                                  "<br><a href='", url, "'>Link to observation</a>"),
+                   group = "Poroderma africanum") %>%
+  
+  # Add layer control to switch between species
+  addLayersControl(
+    overlayGroups = c("Haploblepharus edwardsii", "Haploblepharus pictus", "Poroderma africanum"),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+```
+
+Now I have an interactive map with all three species distributions on it. This will allow me to plan my dive sites for data collection when I start collecting my own data for my honours project.
+
+
