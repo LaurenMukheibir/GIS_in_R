@@ -3,6 +3,10 @@
 #Lauren Mukheibir 
 #02/03/2025
 
+# Setting CRAN
+options(repos = c(CRAN = "https://cloud.r-project.org"))
+
+
 #installing packages
 install.packages("tidyverse")
 install.packages("rinat")

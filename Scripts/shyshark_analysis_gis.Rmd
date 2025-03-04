@@ -8,6 +8,13 @@ date: "2025-03-03"
 This GIS project is for an assignment for Jasper Slingsby's module called GIS in R. 
 The data I will be using is from iNaturalist. Where I will be looking at the distribution of Shysharks, along the Cape Peninsula. The species involved are Haploblepharus edwardsii (ssHe) and Haploblepharus pictus (ssHp). In addition, I used data on Poroderma africanum to compare distributions of these Shysharks.
 
+## Setting CRAN
+```{r}
+options(repos = c(CRAN = "https://cloud.r-project.org"))
+
+```
+
+
 ## Installing Packages
 Below are the packages needed to start this project. Along the way I will add more.
 ```{r}
