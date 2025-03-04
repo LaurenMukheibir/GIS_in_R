@@ -1,6 +1,6 @@
-install.packages("rmarkdown")
 install.packages("tidyverse")
 install.packages("rinat")
 install.packages("sf")
 install.packages("ggplot2")
 install.packages("dplyr")
+install.packages("rmarkdown")
