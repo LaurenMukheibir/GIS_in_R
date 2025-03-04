@@ -1,5 +1,6 @@
 # GIS_in_R
 Shyshark Distribution across the Cape Peninsula
 
-Need to figure out how to get this link to be better
-file:///C:/Users/laumu/OneDrive/Desktop/GIT/GIS_in_R/GIS_in_R/Scripts/shyshark_analysis_gis.html
+
+Link to view HTML file
+https://rawcdn.githack.com/LaurenMukheibir/GIS_in_R/82f264b7658ab79621b1411aeabc1527841166d5/shyshark_analysis_gis.html
